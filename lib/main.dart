@@ -1,39 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:quizzler_flutter/answer_button.dart';
+import 'package:quizzler_flutter/question.dart';
 
 void main() => runApp(Quizzler());
-
-class AnswerButton extends StatelessWidget {
-  final String text;
-  final Color backgroundColor;
-  final VoidCallback onPressed;
-
-  const AnswerButton({
-    super.key,
-    required this.text,
-    required this.backgroundColor,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Padding(
-        padding: EdgeInsets.all(15.0),
-        child: TextButton(
-          style: TextButton.styleFrom(
-            foregroundColor: Colors.white,
-            backgroundColor: backgroundColor,
-          ),
-          onPressed: onPressed,
-          child: Text(
-            text,
-            style: TextStyle(color: Colors.white, fontSize: 20),
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 class Quizzler extends StatelessWidget {
   const Quizzler({super.key});
@@ -151,16 +120,3 @@ question1: 'You can lead a cow down stairs but not up stairs.', false,
 question2: 'Approximately one quarter of human bones are in the feet.', true,
 question3: 'A slug\'s blood is green.', true,
 */
-
-class Question {
-  final String questionText;
-  final bool answer;
-
-  const Question(this.questionText, this.answer);
-}
-
-final List<Question> questions = [
-  Question('You can lead a cow down stairs but not up stairs.', false),
-  Question('Approximately one quarter of human bones are in the feet.', true),
-  Question('A slug\'s blood is green.', true),
-];
