@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:quizzler_flutter/answer_button.dart';
-import 'package:quizzler_flutter/question.dart';
+import 'quiz_brain.dart';
+
+QuizBrain quizBrain = QuizBrain();
 
 void main() => runApp(Quizzler());
 
@@ -31,38 +33,37 @@ class QuizPage extends StatefulWidget {
 }
 
 class QuizPageState extends State<QuizPage> {
-  int _currentQuestion = 0;
-  final List<Question> _questionsToAsk = questions;
-  List<Widget> _scoreKeeper = [];
+  // List<Widget> _scoreKeeper = [];
+  //
+  // void _addScore(bool isCorrect) {
+  //   setState(() {
+  //     isCorrect
+  //         ? _scoreKeeper.add(Icon(Icons.check, color: Colors.green))
+  //         : _scoreKeeper.add(Icon(Icons.close, color: Colors.red));
+  //   });
+  // }
 
-  void _goToNextQuestion() {
-    if (_currentQuestion < _questionsToAsk.length - 1) {
-      setState(() {
-        _currentQuestion++;
-      });
-    }
-  }
-
-  void _resetQuiz() {
+  void _checkAnswer(bool userAnswer) {
+    quizBrain.addScore(userAnswer == quizBrain.questionAnswer());
     setState(() {
-      _currentQuestion = 0;
-      _scoreKeeper = [];
+      quizBrain.goToNextQuestion();
     });
   }
 
-  void _addScore(bool isCorrect) {
+  void _handleQuizReset() {
     setState(() {
-      isCorrect
-          ? _scoreKeeper.add(Icon(Icons.check, color: Colors.green))
-          : _scoreKeeper.add(Icon(Icons.close, color: Colors.red));
+      quizBrain.resetQuiz();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    bool isQuizOver =
-        _currentQuestion == _questionsToAsk.length - 1 &&
-        _scoreKeeper.length >= _questionsToAsk.length;
+    // Derive _scoreKeeper from quizBrain.score()
+    List<Widget> currentScoreKeeper = quizBrain.score().map((isCorrect) {
+      return isCorrect
+          ? Icon(Icons.check, color: Colors.green)
+          : Icon(Icons.close, color: Colors.red);
+    }).toList();
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -74,8 +75,8 @@ class QuizPageState extends State<QuizPage> {
             padding: EdgeInsets.all(10.0),
             child: Center(
               child: Text(
-                !isQuizOver
-                    ? _questionsToAsk[_currentQuestion].questionText
+                !quizBrain.gameOver()
+                    ? quizBrain.questionText()
                     : 'Thank You. Try Again',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 25.0, color: Colors.white),
@@ -84,11 +85,11 @@ class QuizPageState extends State<QuizPage> {
           ),
         ),
 
-        if (isQuizOver) ...[
+        if (quizBrain.gameOver()) ...[
           AnswerButton(
             text: 'Restart',
             backgroundColor: Colors.blue,
-            onPressed: _resetQuiz,
+            onPressed: _handleQuizReset,
           ),
           SizedBox.shrink(),
         ] else ...[
@@ -96,20 +97,26 @@ class QuizPageState extends State<QuizPage> {
             text: 'True',
             backgroundColor: Colors.green,
             onPressed: () {
-              _addScore(true == _questionsToAsk[_currentQuestion].answer);
-              _goToNextQuestion();
+              _checkAnswer(true);
             },
           ),
           AnswerButton(
             text: 'False',
             backgroundColor: Colors.red,
             onPressed: () {
-              _addScore(false == _questionsToAsk[_currentQuestion].answer);
-              _goToNextQuestion();
+              _checkAnswer(false);
             },
           ),
         ],
-        Row(children: _scoreKeeper),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Wrap(
+            spacing: 4.0,
+            runSpacing: 4.0,
+            alignment: WrapAlignment.start,
+            children: currentScoreKeeper,
+          ),
+        ),
       ],
     );
   }
